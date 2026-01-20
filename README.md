@@ -1,1 +1,77 @@
-VeriFood-RLVR: Zero-Hallucination Dietary Safety AgentOn-Device Reasoning with GRPO & Quantization-Aware Fine-Tuning (QAFT)VeriFood-RLVR is a high-stakes AI engineering project focused on solving the Reliability Gap in dietary safety. By leveraging Reinforcement Learning from Verifiable Rewards (RLVR) and Quantization-Aware Fine-Tuning, this project deploys a Mixture-of-Experts (MoE) model on the iPhone 17 Pro Max that is provably safer than cloud-based frontier models.🏗️ Technical ThesisCurrent dietary AI systems fail at a rate of 7.1% for allergens because they rely on "probabilistic vibes" rather than "deterministic logic."This project demonstrates a shift to Reasoning Systems Engineering:Safety-First RL: Implementing Group Relative Policy Optimization (GRPO) to align models with binary, code-based safety rewards.Edge Mastery: Optimizing Qwen3-30B-A3B (3.3B active parameters) for the Apple A19 Pro chip.Verifiable Logic: Replacing "LLM-as-a-Judge" with deterministic Python/Swift verifiers to eliminate reward hacking.🛠️ The Implementation Stack1. The Reasoning Core (RLVR)Instead of standard SFT (Supervised Fine-Tuning), we use an RL loop where the model is rewarded only when its internal reasoning (<think>) matches the deterministic truth.Model: Qwen3-30B-A3B (MoE)Algorithm: GRPO (Memory-efficient, no Critic model required)Reward Signal: A Python/Swift verifier checking for hidden ingredients (e.g., Koji in Miso for Celiacs, Lard in beans for Halal/Kosher).2. Edge Optimization (The 2026 Mobile Standard)Quantization: 4-bit NormalFloat (NF4) with Quantization-Aware Fine-Tuning (QAFT). We simulate quantization noise during RL training to prevent the "intelligence collapse" typically seen in 3B-class models.Framework: MLX Swift for direct access to the iPhone 17 Pro Max's Unified Memory Architecture and 16-core Neural Engine.Speculative Decoding: Uses a SmolLM-360M draft model to accelerate inference, achieving 15+ tokens/second on-device.🔒 Safety Hierarchy & Reward EngineeringThe agent is trained against a tiered hierarchy of constraints:TierCategoryExample Logic0Fatal AllergensIf 'Praline' in Thought AND 'Safe' in Answer -> Reward = 01Medical/CeliacIf 'Soy Sauce' in Input AND 'Gluten-Free' in Answer -> Reward = 02Religious LawsReasoning must verify cross-contamination for Halal/Kosher/Jain.📊 Performance BenchmarksMetricGPT-4o (Cloud)VeriFood-RLVR (Local 3B)Allergy Safety Accuracy92.9%99.8%Religious Law Compliance84.1%99.1%Inference Latency~2.5s1.2sPrivacy TierServer-side Logging100% On-Device (Zero Data Leak)🚀 Development RoadmapPhase 1: The Deterministic Rewarder (Current)[x] Architect the Python-based Verifiable Rewarder.[ ] Build the "Red-Teaming" dataset of 500 dietary traps.[ ] Establish the <think> trajectory baseline for Qwen3-30B-A3B.Phase 2: Training & Alignment[ ] Implement GRPO loop using OpenRLHF.[ ] Perform Quantization-Aware Fine-Tuning (QAFT) to NF4.Phase 3: Mobile Deployment[ ] Convert weights to MLX format.[ ] Implement native Swift UI with "Reasoning Cards" for user transparency.📚 Key Research & CitationsDeepSeek-R1 (2025): Incentivizing Reasoning Capability via RLVR.Shao et al. (2024): Computing Advantage in GRPO without Value Functions.Apple MLX Docs: High-performance machine learning on Apple Silicon.👨‍🔬 AuthorAdit Karode Computer Science @ Northeastern University Specializing in NLP, RLHF/RLVR, and AI Safety.
+# VeriFood-RLVR
+
+A dietary safety AI that uses reinforcement learning with verifiable rewards to eliminate hallucinations in allergy and dietary restriction checking.
+
+## The Problem
+
+Current AI assistants for dietary safety (GPT-4, Claude, etc.) hallucinate about 7% of the time on allergen questions. When someone with a severe peanut allergy asks if a dish is safe, 7% failure rate is unacceptable. The issue is that these models generate "vibes-based" answers rather than systematic reasoning.
+
+## The Approach
+
+Instead of traditional fine-tuning, this project uses **Reinforcement Learning from Verifiable Rewards (RLVR)** to train a model that:
+
+1. **Shows its work**: The model generates explicit reasoning chains (`<think>` tags) explaining why something is or isn't safe
+2. **Gets checked by code**: A deterministic Python verifier validates the reasoning against known dietary restrictions
+3. **Learns from verification**: Only correct reasoning chains are rewarded during training
+
+This means the model can't just "sound confident" - it has to actually trace through ingredients, check for hidden allergens (like koji in miso containing gluten), and verify cross-contamination risks.
+
+## Technical Stack
+
+**Model**: Qwen3-30B-A3B (Mixture-of-Experts, 3.3B active parameters)
+- Small enough to run on-device
+- Large enough to handle complex reasoning
+
+**Training**: Group Relative Policy Optimization (GRPO)
+- Memory-efficient RL (no critic network needed)
+- Rewards only valid reasoning chains
+- Binary safety checks: either fully correct or wrong
+
+**Deployment Target**: iPhone 17 Pro Max
+- 4-bit quantization (NF4) 
+- MLX Swift framework for native performance
+- Fully on-device (zero server calls, complete privacy)
+
+## Safety Hierarchy
+
+The verifier checks three tiers of dietary restrictions:
+
+**Tier 0 - Fatal Allergens**: Peanuts, tree nuts, shellfish, etc.  
+**Tier 1 - Medical Restrictions**: Celiac (gluten), lactose intolerance, etc.  
+**Tier 2 - Religious/Ethical**: Halal, Kosher, Jain, vegan
+
+Each tier requires different levels of reasoning about cross-contamination and hidden ingredients.
+
+## Current Status
+
+**Phase 1** (In Progress): Building the Verifier
+- [x] Design the reward verification system
+- [ ] Create test dataset of 500+ edge cases
+- [ ] Baseline the reasoning quality of base model
+
+**Phase 2** (Planned): Training
+- [ ] Implement GRPO training loop
+- [ ] Quantization-aware fine-tuning
+
+**Phase 3** (Planned): Mobile Deployment  
+- [ ] Port to MLX format
+- [ ] Build Swift UI with reasoning transparency
+
+## Why This Matters
+
+Most AI safety work focuses on abstract alignment problems. This project tackles a concrete, measurable safety gap with real-world stakes. If successful, it demonstrates that:
+
+- Small models (3B params) can outperform large models (100B+) on domain-specific safety
+- Verifiable reasoning beats probabilistic confidence
+- Edge deployment isn't just about privacy - it's about reliability
+
+## References
+
+- DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning (2025)
+- Shao et al.: DeepSeekMath - Pushing the Limits of Mathematical Reasoning (2024)
+- Apple MLX: Machine Learning for Apple Silicon
+
+---
+
+**Author**: Adit Karode  
+CS @ Northeastern | Interested in NLP, RLHF, and AI Safety
