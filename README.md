@@ -1,6 +1,6 @@
-# VeriFood-RLVR
+# Koala
 
-A dietary safety AI that uses reinforcement learning with verifiable rewards to eliminate hallucinations in allergy and dietary restriction checking.
+A dietary safety AI that uses reinforcement learning with verifiable rewards to eliminate hallucinations in allergy and dietary restriction checking. Named after koalas, which are famously picky eaters.
 
 ## The Problem
 
@@ -24,8 +24,7 @@ This means the model can't just "sound confident" - it has to actually trace thr
 
 **Training**: Group Relative Policy Optimization (GRPO)
 - Memory-efficient RL (no critic network needed)
-- Rewards only valid reasoning chains
-- Binary safety checks: either fully correct or wrong
+- Verdict correctness is binary; reward scales with reasoning quality
 
 **Deployment Target**: iPhone 17 Pro Max
 - 4-bit quantization (NF4) 
@@ -36,18 +35,52 @@ This means the model can't just "sound confident" - it has to actually trace thr
 
 The verifier checks three tiers of dietary restrictions:
 
-**Tier 0 - Fatal Allergens**: Peanuts, tree nuts, shellfish, etc.  
-**Tier 1 - Medical Restrictions**: Celiac (gluten), lactose intolerance, etc.  
-**Tier 2 - Religious/Ethical**: Halal, Kosher, Jain, vegan
+**Tier 0 - Fatal Allergens**: Peanuts, shellfish, etc.  
+**Tier 1 - Medical Restrictions**: Celiac (gluten), etc.  
+**Tier 2 - Religious/Ethical**: Halal, etc.
 
-Each tier requires different levels of reasoning about cross-contamination and hidden ingredients.
+Each tier requires different levels of reasoning about cross-contamination and hidden ingredients. Defaults are defined in `constraints.py` and can be extended per user.
+
+## Module Layout
+
+- `constraints.py`: Constraint definitions, catalog, and default constraint set
+- `profiles.py`: User profile configuration (enabled constraints, overrides, custom additions)
+- `rewarder.py`: Verification logic and reward calculation
+- `verifier.py`: Public entrypoint that re-exports the core API and includes a demo
+
+## Profiles and Constraints
+
+Profiles enable different allergies/religions/preferences without changing core logic.
+
+```python
+from constraints import ConstraintDefinition, ConstraintLevel
+from profiles import UserProfile
+from rewarder import DietaryRewarder
+
+vegan = ConstraintDefinition(
+    key="vegan",
+    level=ConstraintLevel.PREFERENCE,
+    terms=["beef", "pork", "chicken", "fish", "egg", "milk", "cheese"],
+)
+
+profile = UserProfile(
+    enabled_constraints=["peanut", "vegan"],
+    custom_constraints=[vegan],
+)
+
+judge = DietaryRewarder(profile)
+```
 
 ## Current Status
 
 **Phase 1** (In Progress): Building the Verifier
-- [x] Design the reward verification system
+- [x] Modular verifier + reward function (constraints, profiles, rewarder)
 - [ ] Create test dataset of 500+ edge cases
 - [ ] Baseline the reasoning quality of base model
+
+**Phase 1.5** (Planned): RLVR Plumbing
+- [ ] Dataset + inference pipeline to generate `<think>` + verdicts
+- [ ] Reward logging + eval harness (offline RLVR loop)
 
 **Phase 2** (Planned): Training
 - [ ] Implement GRPO training loop
